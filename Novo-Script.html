@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Novo Script</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --bg1: #0f1724;
+      --bg2: #2b2a4a;
+      --card: #1f2330;
+      --muted: #cbd5e1;
+      --accent1: #4ea8ff;
+      --accent2: #7c3aed;
+    }
+    html,body{height:100%;margin:0;padding:0;}
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: ltr;
+      text-align: left;
+      margin: 20px;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--muted);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .container{max-width:980px;margin:0 auto;width:100%;}
+    header h2{color:#e6f0ff;margin:0 0 8px 0;font-size:22px;text-align:center;text-shadow:0 2px 8px rgba(124,58,237,0.12);}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:40px 20px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 25px rgba(0,0,0,0.25);
+    }
+    textarea{
+      width:90%;height:200px;margin:20px auto;background-color:var(--card);color:#f8fafc;border:1px solid rgba(255,255,255,0.1);
+      padding:12px;font-size:15px;border-radius:8px;resize:vertical;box-shadow:0 6px 18px rgba(2,6,23,0.6);line-height:1.5;
+      direction: rtl; text-align: right;
+    }
+    .controls{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:10px;}
+    button{padding:10px 24px;font-size:15px;border:none;border-radius:8px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 14px rgba(78,168,255,0.12);}
+    button:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(124,58,237,0.12);}
+    footer{margin-top:auto;text-align:center;padding:18px 10px;font-size:15px;color:#ffffff;letter-spacing:0.8px;font-weight:bold;border-top:1px solid rgba(255,255,255,0.03);position:sticky;bottom:0;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));display:flex;justify-content:center;align-items:center;}
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header><h2>Add Script here:</h2></header>
+
+    <div class="card">
+      <textarea id="inputScript" placeholder="ألصق السكربت هنا..."></textarea>
+
+      <div class="controls">
+        <button id="runBtn">Run & Copy</button>
+        <button id="resetBtn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>Created By Geek</footer>
+
+  <script>
+    const runBtn = document.getElementById('runBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const input = document.getElementById('inputScript');
+
+    function buildWithParagraphs(text) {
+      // split on CRLF or LF, preserve empty lines exactly
+      const lines = text.split(/\r?\n/);
+      // add <p>&nbsp;</p> after every line (including empty lines)
+      return lines.map(line => line + '\n<p>&nbsp;</p>').join('\n');
+    }
+
+    async function copyTextToClipboard(text) {
+      // try modern API first
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (e) {
+        // fall through to fallback method
+      }
+
+      // fallback using a temporary textarea
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        // make off-screen and readonly to avoid scrolling/focus issues
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    runBtn.addEventListener('click', async () => {
+      const raw = input.value;
+      if (!raw.trim()) return alert('⚠️ Please paste a script first!');
+      const result = buildWithParagraphs(raw);
+      const ok = await copyTextToClipboard(result);
+      if (ok) {
+        alert('✅ Script modified and copied successfully!');
+      } else {
+        alert('❌ Copy failed — please try selecting the text manually.');
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      input.value = '';
+    });
+  </script>
+
+</body>
+</html>
